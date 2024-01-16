@@ -12,16 +12,28 @@ const connect = require('./config/database-config');
 
 
 io.on('connection', (socket) => {
-    console.log('a user connected', socket.id);
+    socket.on('join_room', (data) => {
+        console.log("joining a room", data.roomid);
+        socket.join(data.roomid);
+    })
 
     socket.on('msg_send', (data) => {
         console.log(data);
-        io.emit('msg_rcvd', data);
-        //socket.emit('msg_rcvd', data);
+        // io.emit('msg_rcvd', data);
+        // socket.emit('msg_rcvd', data);
+        io.to(data.roomid).emit('msg_rcvd', data);
     });
 });
 
+app.set('view engine', 'ejs');
 app.use('/', express.static(__dirname + '/public'));
+
+app.get('/chat/:roomid', (req, res) => {
+    res.render('index', {
+        name: 'Mohit',
+        id: req.params.roomid,
+    });
+})
 
 server.listen(3000, async () => {
     console.log('Server started');
