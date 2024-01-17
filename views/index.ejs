@@ -11,13 +11,16 @@
 <body>
     <h1>Chat box </h1>
     <input id="startchat" type="hidden" data-roomid="<%= id %>"></input>
-
     <input type="text" id="username" placeholder="user id...">
     <input id="newmsg" type="text" placeholder="message..">
+    <span id="typing">typing...</span>
     <button id="btn" class="btn btn-primary">Send</button>
 
     <ul id="msglist">
-
+        <!-- to ensure we store the old chats when new person joins the room  -->
+        <% for(let i=0; i < chats.length; i++) { %>
+            <li><%= chats[i].user %> : <%= chats[i].content %></li>
+         <% } %>
     </ul>
 
 
@@ -28,12 +31,15 @@
 
         let startchat = document.getElementById('startchat');
 
+        let receiveTypingId = null;
+        let  typingId = null;  
+
         let btn = document.getElementById('btn');
+        let spanTyping = document.getElementById('typing');
+        spanTyping.style.display = 'none'; 
         let inputMsg = document.getElementById('newmsg');
         let username = document.getElementById('username');
         let msgList = document.getElementById('msglist');
-
-
 
         btn.onclick = function exec() {
             socket.emit('msg_send', {
@@ -45,12 +51,31 @@
 
         socket.emit('join_room', {
             roomid: startchat.getAttribute('data-roomid')
-        })
+        });
 
         socket.on('msg_rcvd', (data) => {
             let limsg = document.createElement('li');
             limsg.innerText = `${data.username}: ${data.msg}`;
             msgList.appendChild(limsg);
+        });
+
+       socket.on('someone_typing', (data) => {
+          spanTyping.style.display = 'block';
+        //   typingId = setTimeout(() => {
+        //     if(!typing) {
+        //         spanTyping.style.display = 'none';
+        //     }
+        //   },2000)
+       })
+        
+        inputMsg.addEventListener('keypress', function(e) {
+            socket.emit('typing' , {
+                roomid: startchat.getAttribute('data-roomid'),
+            });
+            typingId = setTimeout(() => {
+
+            }, 3000);
+
         })
     </script>
 </body>
