@@ -25,12 +25,12 @@ io.on('connection', (socket) => {
             user: data.username,
             content: data.msg
         })
-        io.to(data.roomid).broadcast.emit('msg_rcvd', data);
+        io.to(data.roomid).emit('msg_rcvd', data);
     });
 
      // server shows "someone is typing" when in actual in that chat room some person in typing after receving from index.ejs file
     socket.on('typing', (data) => {
-        io.to(data.roomid).emit('someone_typing');
+        socket.broadcast.to(data.roomid).emit('someone_typing');
     })
 });
 
